@@ -1,0 +1,19 @@
+.ng-valid[required], .ng-valid.required  {
+    border-left: 2px solid rgb(31, 150, 37);
+  }
+  
+  .ng-invalid:not(form)  {
+    border-left: 2px solid #a01616;
+  }
+
+  .big-checkbox {
+    text-align: center; 
+    vertical-align: middle;
+    width: 20px; 
+    height: 20px;
+  }
+
+  #pager {
+    margin-top: 17px;
+    align-self: auto;
+  }

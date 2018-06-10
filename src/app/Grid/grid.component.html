@@ -1,0 +1,208 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#"></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link active" href="#" data-toggle="modal" data-target="#myModal">Add Fault <span class="sr-only">(current)</span></a>
+        <a class="nav-item nav-link" href="#" (click)="resolvedFilter()">Resolved</a>
+        <a class="nav-item nav-link" href="#" data-toggle="modal" data-target="#adminModal">Admin Login</a>
+        <a class="nav-item nav-link" href="#" *ngIf="loggedIn" (click)="logOut()">Log Out</a>
+      </div>
+    </div>
+    <div id="pager">
+        <pagination-controls (pageChange)="p = $event"></pagination-controls>
+    </div>
+  </nav>
+
+
+<div class="m-x-auto p-a-2">
+  <table class="table table-striped table-hover table-bordered">
+    <thead class="thead-dark">
+    <tr>
+      <td>Name</td>
+      <td (click)="sort()" >Date</td>
+      <td>Location</td>
+      <!-- <td>Badge Number</td> -->
+      <td>Problem</td>
+      <td>Resolved</td>
+      <td>Resolution</td>
+    </tr>
+  </thead>
+ <tr *ngFor= "let fault of faults | faultFilter: isresolved | OrderByUpcomingToLatestPipe: sorted | paginate: { itemsPerPage: 10, currentPage: p }">
+   <td>{{fault.name}}</td>
+   <td>{{fault.date | date:'medium'}}</td>
+   <td>{{fault.loc}}</td>
+   <!-- <td>{{fault.badgeNum}}</td> -->
+   <td style="width: 35%">{{fault.problem}}</td>
+   <td>{{fault.resolved}}</td>
+   <td style="width: 35%">{{fault.resolution}}</td>
+   <td *ngIf="loggedIn" ><a href="#" (click)="myFunction(fault._id)">Delete</a></td>
+   <td *ngIf="loggedIn" ><a href="#" (click)=loadFaults(fault) data-toggle="modal" data-target="#editModal">Edit</a></td>
+  </tr>
+  
+</table>
+</div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Add New Fault</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+              <form #faultForm="ngForm" ngNativeValidate (ngSubmit)="faultForm.valid && createproduct(faultForm.value); faultForm.reset()">
+                  <div class="form-group">
+                    <label class="form-control-label">Name</label>
+                    <input type="text" class="form-control" name="newname" ngModel required #newname="ngModel">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-control-label">Location</label>
+                    <input type="text"class="form-control" name="newloc" ngModel required #newloc="ngModel">
+                  </div>
+              
+                <!-- <tr>
+                    <td>Badge Number</td><td><input type="number" class="form-control" name="newbadge" ngModel #newbadge="ngModel"></td>
+                </tr> -->
+                <div class="form-group">
+                    <label class="form-control-label">Problem</label>
+                    <textarea type="text" class="form-control" rows="4" name="newproblem" ngModel required #newproblem="ngModel"></textarea>
+                  </div>
+                
+              
+                <input *ngIf="!loggedIn" type="hidden" class="form-control big-checkbox center" name="newresolved" [checked]="isChecked" (change)="isChecked = $event.target.checked" ngModel #newresolved="ngModel">
+        
+   
+                <div *ngIf="loggedIn">
+
+
+                    <div class="form-check">
+                        <label class="form-check-label">
+                          <input class="form-check-input" type="checkbox" name="newresolved" [checked]="isChecked" (change)="isChecked = $event.target.checked" ngModel #newresolved="ngModel">
+                          Resolved
+                        </label>
+                      </div>
+                    <div class="form-group">
+                    <label class="form-control-label">Resolution</label>
+                    <textarea type="text" class="form-control" rows="4" name="newresolution" ngModel #newname="ngModel"></textarea>
+                  </div>
+                </div>
+
+
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="faultForm.reset()"data-dismiss="modal">Close</button>
+                <button class="btn btn-primary">Submit</button>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>
+  </div>
+
+<!-- end of modal -->
+
+  <!-- adminModal -->
+  <div class="modal fade" id="adminModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Enter Password</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+  
+                <form #adminForm="ngForm" ngNativeValidate (ngSubmit)="adminForm.valid && login(adminForm.value); adminForm.reset()">
+       
+
+                      <div class="form-group">
+                          <input type="password" class="form-control" placeholder="Password" name="password" ngModel required #password="ngModel">
+                        </div>
+
+              
+                  <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" (click)="adminForm.reset()"data-dismiss="modal">Close</button>
+                  <button class="btn btn-primary">Submit</button>
+                </div>
+                </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end of modal -->
+    
+  
+  <!-- Modal -->
+    
+    
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Add New Fault</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                  <form #edForm="ngForm" ngNativeValidate (ngSubmit)="update(edForm.value)">
+               
+                    
+                            <input type="hidden" class="form-control" name="_id" [(ngModel)]="selectedFault._id" required #id="ngModel">
+                            <input type="hidden" class="form-control" name="newdate" [(ngModel)]="selectedFault.date" required #id="ngModel">
+                      
+                            <div class="form-group">
+                                <label class="form-control-label">Name</label>
+                       <input type="text" class="form-control" name="newname" [(ngModel)]="selectedFault.name" required #newname="ngModel">
+                       </div>
+                   
+                       <div class="form-group">
+                          <label class="form-control-label">Location</label>
+                        <input type="text"class="form-control" name="newloc" [(ngModel)]="selectedFault.loc" required #newloc="ngModel">
+                    </div>
+                    <!-- <tr>
+                        <td>Badge Number</td><td><input type="number" class="form-control" name="newbadge" [(ngModel)]="selectedFault.badgeNum" #newbadge="ngModel"></td>
+                    </tr> -->
+                    <div class="form-group">
+                        <label class="form-control-label">Problem</label>
+                        <textarea type="text" class="form-control" rows="4" name="newproblem" [(ngModel)]="selectedFault.problem" required #newproblem="ngModel"></textarea>
+                        </div>
+                    
+                    <div *ngIf="loggedIn">
+                        <div class="form-check">
+                            <label class="form-check-label">
+                              <input class="form-check-input" type="checkbox" name="newresolved" [(ngModel)]="selectedFault.resolved" #newresolved="ngModel">
+                              Resolved
+                            </label>
+                          </div>
+                          <div class="form-group">
+                              <label class="form-control-label">Resolution</label>
+                              <textarea type="text" class="form-control" rows="4" name="newresolution" [(ngModel)]="selectedFault.resolution" #newname="ngModel"></textarea>
+                            </div>
+                    
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button class="btn btn-primary">Submit</button>
+                  </div>
+                  </form>
+          </div>
+        </div>
+      </div>
+      </div>
+
+    
+    <!-- end of modal -->
+
+
+
+
